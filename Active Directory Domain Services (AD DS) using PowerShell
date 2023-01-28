@@ -42,3 +42,5 @@ Remove-ADUser -Identity "CN=TestUser,OU=TestOU,DC=mydomain,DC=local" -Confirm:$f
 
 # Remove the "TestOU" OU
 Remove-ADOrganizationalUnit -Identity "OU=TestOU,DC=mydomain,DC=local" -Confirm:$false
+
+
