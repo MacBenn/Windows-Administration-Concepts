@@ -1,0 +1,44 @@
+# This script demonstrates basic knowledge of managing Active Directory Domain Services (AD DS) using PowerShell.
+
+# Import the Active Directory module for Windows PowerShell
+Import-Module ActiveDirectory
+
+# Get a list of all domain controllers in the current domain
+$domainControllers = Get-ADDomainController -Filter *
+
+# Display the hostname and IP address of each domain controller
+foreach($dc in $domainControllers) {
+    Write-Host "Domain controller: $($dc.HostName) IP address: $($dc.IPv4Address)"
+}
+
+# Create a new organizational unit (OU) named "TestOU"
+New-ADOrganizationalUnit -Name "TestOU" -Path "DC=mydomain,DC=local"
+
+# Create a new user account named "TestUser" in the "TestOU" OU
+New-ADUser -Name "TestUser" -GivenName "Test" -Surname "User" -DisplayName "Test User" -SamAccountName "testuser" -UserPrincipalName "testuser@mydomain.local" -Path "OU=TestOU,DC=mydomain,DC=local" -Enabled $true
+
+# Set the password for the "TestUser" account to "P@ssw0rd"
+Set-ADAccountPassword -Identity "CN=TestUser,OU=TestOU,DC=mydomain,DC=local" -NewPassword (ConvertTo-SecureString "P@ssw0rd" -AsPlainText -force)
+
+# Add the "TestUser" account to the "Domain Users" group
+Add-ADGroupMember -Identity "Domain Users" -Members "CN=TestUser,OU=TestOU,DC=mydomain,DC=local"
+
+# Search for the "TestUser" account
+$user = Get-ADUser -Filter {SamAccountName -eq "testuser"}
+
+# Display the properties of the "TestUser" account
+Write-Host "User properties:"
+Write-Host "----------------"
+Write-Host "Name: $($user.Name)"
+Write-Host "GivenName: $($user.GivenName)"
+Write-Host "Surname: $($user.Surname)"
+Write-Host "DisplayName: $($user.DisplayName)"
+Write-Host "SAMAccountName: $($user.SamAccountName)"
+Write-Host "UserPrincipalName: $($user.UserPrincipalName)"
+Write-Host "Enabled: $($user.Enabled)"
+
+# Remove the "TestUser" account
+Remove-ADUser -Identity "CN=TestUser,OU=TestOU,DC=mydomain,DC=local" -Confirm:$false
+
+# Remove the "TestOU" OU
+Remove-ADOrganizationalUnit -Identity "OU=TestOU,DC=mydomain,DC=local" -Confirm:$false
