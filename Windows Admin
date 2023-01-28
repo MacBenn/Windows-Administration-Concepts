@@ -1,0 +1,29 @@
+# Get information about the current logged in user
+$user = Get-WmiObject -Class Win32_ComputerSystem | Select-Object UserName
+Write-Host "The current logged in user is: $user"
+
+# Get the uptime of the system
+$uptime = (Get-Date) - (Get-WmiObject -Class Win32_OperatingSystem | Select-Object LastBootUpTime).LastBootUpTime
+Write-Host "The system has been up for: $uptime"
+
+# Get information about installed hotfixes
+$hotfixes = Get-HotFix
+Write-Host "Installed hotfixes:"
+foreach ($hotfix in $hotfixes) {
+    Write-Host "  $($hotfix.HotFixID) - $($hotfix.Description)"
+}
+
+# Create a new user account
+$username = Read-Host -Prompt "Enter a new username:"
+$password = Read-Host -Prompt "Enter a new password:" -AsSecureString
+$user = New-LocalUser -Name $username -Password $password -FullName "New User" -Description "Created with PowerShell script"
+Write-Host "New user $username has been created."
+
+# Add the new user to the Administrators group
+Add-LocalGroupMember -Group "Administrators" -Member $username
+Write-Host "$username has been added to the Administrators group."
+
+# Restart a service
+$service = Get-Service -Name "Spooler"
+$service | Restart-Service
+Write-Host "The Print Spooler service has been restarted."
